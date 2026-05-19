@@ -1,35 +1,6 @@
 import { createTool } from '@mastra/core/tools';
 import { z } from 'zod';
-
-const LUMA_API_BASE = 'https://public-api.luma.com/v1';
-
-interface LumaEvent {
-  api_id: string;
-  name: string;
-  start_at: string;
-  end_at: string;
-  url: string;
-}
-
-interface LumaEventsResponse {
-  entries: {
-    event: LumaEvent;
-  }[];
-  has_more: boolean;
-  next_cursor?: string;
-}
-
-function getLumaHeaders(): Record<string, string> {
-  const apiKey = process.env.LUMA_API_KEY;
-  if (!apiKey) {
-    throw new Error('LUMA_API_KEY environment variable is not set');
-  }
-  return {
-    'accept': 'application/json',
-    'content-type': 'application/json',
-    'x-luma-api-key': apiKey,
-  };
-}
+import { listLumaEvents } from '../lib/luma/client';
 
 export const listLumaEventsTool = createTool({
   id: 'list-luma-events',
@@ -48,43 +19,8 @@ export const listLumaEventsTool = createTool({
     })),
   }),
   execute: async ({ afterDate, limit }) => {
-    const params = new URLSearchParams();
-    if (afterDate) {
-      params.set('after', afterDate);
-    }
-
-    const allEvents: LumaEvent[] = [];
-    let cursor: string | undefined;
-
-    while (true) {
-      const url = cursor
-        ? `${LUMA_API_BASE}/calendar/list-events?pagination_cursor=${cursor}`
-        : `${LUMA_API_BASE}/calendar/list-events${params.toString() ? '?' + params.toString() : ''}`;
-
-      const response = await fetch(url, {
-        method: 'GET',
-        headers: getLumaHeaders(),
-      });
-
-      if (!response.ok) {
-        const errorText = await response.text();
-        throw new Error(`Failed to list Luma events: ${response.statusText} - ${errorText}`);
-      }
-
-      const data = await response.json() as LumaEventsResponse;
-
-      for (const entry of data.entries) {
-        allEvents.push(entry.event);
-      }
-
-      if (!data.has_more || !data.next_cursor) {
-        break;
-      }
-
-      cursor = data.next_cursor;
-    }
-
-    const latestEvents = allEvents
+    const events = await listLumaEvents(afterDate);
+    const latestEvents = events
       .sort((a, b) => new Date(b.start_at).getTime() - new Date(a.start_at).getTime())
       .slice(0, limit);
 

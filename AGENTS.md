@@ -38,6 +38,8 @@ In order to build a production-ready server, run the `build` script:
 npm run build
 ```
 
+Do not run `npm run build`, `pnpm run build`, or `mastra build` unless the user explicitly asks. Prefer `pnpm exec tsc --noEmit` for validation.
+
 ## Project Structure
 
 Folders organize your agent's resources, like agents, tools, and workflows.

@@ -45,6 +45,7 @@ Optional environment variables:
 
 - `SANITY_DATASET` (default: `production`)
 - `SANITY_WORKSHOP_DOC_TYPE` (default: `workshop`)
+- `SANITY_WORKSHOP_PEOPLE_FIELD` (default: `hostReferences`)
 
 ## Deploy on Mastra Cloud
 

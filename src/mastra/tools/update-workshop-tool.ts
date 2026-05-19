@@ -1,42 +1,22 @@
 import { createTool } from '@mastra/core/tools';
 import { z } from 'zod';
 import { addMinutes } from 'date-fns';
-
-const LUMA_API_BASE = 'https://public-api.luma.com/v1';
+import { getLumaEvent, updateLumaEvent, type LumaUpdateEventInput } from '../lib/luma/client';
+import { uploadLumaImageFromRemoteUrl } from '../lib/luma/images';
+import { upsertWorkshopFromLumaEvent } from '../lib/sanity/workshops';
 
 const hostSchema = z.object({
+  guestId: z.string().optional().describe('Sanity guest document ID (recommended when available)'),
   name: z.string().describe('Host name'),
+  area: z.string().optional().describe('Host role or area to show in Luma, without seniority (for example: Developer Experience, Customer Engineering)'),
   company: z.string().optional().describe('Company or organization'),
   xHandle: z.string().optional().describe('X (Twitter) handle without @'),
   website: z.string().optional().describe('Personal or company website URL'),
 });
 
-interface UploadUrlResponse {
-  upload_url: string;
-  file_url: string;
-}
-
-interface LumaEventDetails {
-  event: {
-    url: string;
-  };
-}
-
-function getLumaHeaders(): Record<string, string> {
-  const apiKey = process.env.LUMA_API_KEY;
-  if (!apiKey) {
-    throw new Error('LUMA_API_KEY environment variable is not set');
-  }
-  return {
-    'accept': 'application/json',
-    'content-type': 'application/json',
-    'x-luma-api-key': apiKey,
-  };
-}
-
 function buildHostsSection(hosts: z.infer<typeof hostSchema>[]): string {
   return hosts.map(host => {
-    const nameAndCompany = host.company ? `${host.name}, ${host.company}` : host.name;
+    const hostDetails = [host.name, host.area, host.company].filter(Boolean).join(', ');
     const subItems: string[] = [];
     if (host.xHandle) {
       subItems.push(`  - https://x.com/${host.xHandle}`);
@@ -44,7 +24,7 @@ function buildHostsSection(hosts: z.infer<typeof hostSchema>[]): string {
     if (host.website) {
       subItems.push(`  - ${host.website}`);
     }
-    const line = `- ${nameAndCompany}`;
+    const line = `- ${hostDetails}`;
     return subItems.length > 0 ? `${line}\n${subItems.join('\n')}` : line;
   }).join('\n');
 }
@@ -70,59 +50,9 @@ function buildDescription(
   return parts.join('\n');
 }
 
-async function createImageUploadUrl(): Promise<UploadUrlResponse> {
-  const response = await fetch(`${LUMA_API_BASE}/images/create-upload-url`, {
-    method: 'POST',
-    headers: getLumaHeaders(),
-    body: JSON.stringify({ purpose: 'event-cover' }),
-  });
-
-  if (!response.ok) {
-    throw new Error(`Failed to create image upload URL: ${response.statusText}`);
-  }
-
-  return response.json() as Promise<UploadUrlResponse>;
-}
-
-async function downloadImage(url: string): Promise<ArrayBuffer> {
-  const response = await fetch(url);
-  if (!response.ok) {
-    throw new Error(`Failed to download image from ${url}: ${response.statusText}`);
-  }
-  return response.arrayBuffer();
-}
-
-async function uploadCoverImage(uploadUrl: string, imageData: ArrayBuffer): Promise<void> {
-  const response = await fetch(uploadUrl, {
-    method: 'PUT',
-    headers: {
-      'Content-Type': 'image/png',
-    },
-    body: imageData,
-  });
-
-  if (!response.ok) {
-    throw new Error(`Failed to upload cover image: ${response.statusText}`);
-  }
-}
-
-async function getEventUrl(apiId: string): Promise<string> {
-  const response = await fetch(`${LUMA_API_BASE}/event/get?id=${apiId}`, {
-    method: 'GET',
-    headers: getLumaHeaders(),
-  });
-
-  if (!response.ok) {
-    throw new Error(`Failed to get event details: ${response.statusText}`);
-  }
-
-  const data = await response.json() as LumaEventDetails;
-  return data.event.url;
-}
-
-export const updateLumaEventTool = createTool({
-  id: 'update-luma-event',
-  description: 'Update an existing event on Luma',
+export const updateWorkshopTool = createTool({
+  id: 'update-workshop',
+  description: 'Update a workshop in Luma, then update its corresponding workshop document in Sanity',
   requireApproval: true,
   inputSchema: z.object({
     eventId: z.string().describe('Luma API ID of the event to update'),
@@ -137,9 +67,11 @@ export const updateLumaEventTool = createTool({
     eventId: z.string().describe('Luma API ID for the event'),
     eventUrl: z.string().describe('Public URL for the event'),
     updatedFields: z.array(z.string()).describe('List of fields that were updated'),
+    sanityDocId: z.string().optional().describe('Sanity document ID created or updated for this workshop'),
+    sanityAction: z.enum(['created', 'updated']).optional().describe('Whether the related Sanity workshop doc was created or updated'),
   }),
   execute: async ({ eventId, title, hosts, description, startAt, duration, coverImageUrl }) => {
-    const updatePayload: Record<string, unknown> = {};
+    const updatePayload: LumaUpdateEventInput = {};
     const updatedFields: string[] = [];
 
     if (title !== undefined) {
@@ -181,10 +113,7 @@ export const updateLumaEventTool = createTool({
     }
 
     if (coverImageUrl !== undefined) {
-      const { upload_url, file_url } = await createImageUploadUrl();
-      const imageData = await downloadImage(coverImageUrl);
-      await uploadCoverImage(upload_url, imageData);
-      updatePayload.cover_url = file_url;
+      updatePayload.cover_url = await uploadLumaImageFromRemoteUrl(coverImageUrl);
       updatedFields.push('coverImage');
     }
 
@@ -192,26 +121,16 @@ export const updateLumaEventTool = createTool({
       throw new Error('No fields to update. Provide at least one field to change.');
     }
 
-    const response = await fetch(`${LUMA_API_BASE}/event/update`, {
-      method: 'POST',
-      headers: getLumaHeaders(),
-      body: JSON.stringify({
-        event_api_id: eventId,
-        ...updatePayload,
-      }),
-    });
-
-    if (!response.ok) {
-      const errorText = await response.text();
-      throw new Error(`Failed to update Luma event: ${response.statusText} - ${errorText}`);
-    }
-
-    const eventUrl = await getEventUrl(eventId);
+    await updateLumaEvent(eventId, updatePayload);
+    const event = await getLumaEvent(eventId);
+    const sanitySync = await upsertWorkshopFromLumaEvent(event, hosts);
 
     return {
       eventId,
-      eventUrl,
+      eventUrl: event.url,
       updatedFields,
+      sanityDocId: sanitySync.docId,
+      sanityAction: sanitySync.action,
     };
   },
 });

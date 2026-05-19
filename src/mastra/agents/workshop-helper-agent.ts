@@ -1,14 +1,18 @@
 import { Agent } from "@mastra/core/agent";
 import { Memory } from "@mastra/memory";
-import { createLumaEventTool } from "../tools/create-luma-event-tool";
-import { updateLumaEventTool } from "../tools/update-luma-event-tool";
+import { createWorkshopTool } from "../tools/create-workshop-tool";
+import { updateWorkshopTool } from "../tools/update-workshop-tool";
+import { deleteWorkshopTool } from "../tools/delete-workshop-tool";
 import { listLumaEventsTool } from "../tools/list-luma-events-tool";
 import { getLumaEventTool } from "../tools/get-luma-event-tool";
 import { uploadLumaImageTool } from "../tools/upload-luma-image-tool";
 import { searchSanityGuestsTool } from "../tools/search-sanity-guests-tool";
 import { createSanityGuestTool } from "../tools/create-sanity-guest-tool";
-import { writeDescriptionTool } from "../tools/write-description-tool";
 import { descriptionWriterAgent } from "./description-writer-agent";
+
+function getCurrentUtcDate(): string {
+  return new Date().toISOString().slice(0, 10);
+}
 
 export const workshopHelperAgent = new Agent({
   id: "workshop-helper-agent",
@@ -16,7 +20,7 @@ export const workshopHelperAgent = new Agent({
   instructions: () => `
 You are a workshop assistant that creates and manages Luma events.
 
-Current date/time (UTC): ${new Date().toUTCString()}
+Current date (UTC): ${getCurrentUtcDate()}
 
 ## Workshop Defaults
 
@@ -33,9 +37,10 @@ Required: title and at least one host name.
 When the user mentions host names:
 1. Search Sanity CMS first using search-sanity-guests
 2. Present matching results for the user to confirm
-3. If no match is found, ask for details (company, xHandle, website) and offer to create the guest in Sanity using create-sanity-guest
-4. Use the confirmed guest data when creating or updating the Luma event
-5. Never fabricate host details — always look up or ask
+3. If no match is found, ask for details (area, company, xHandle, website) and offer to create the guest in Sanity using create-sanity-guest
+4. Use the confirmed guest data when creating or updating the workshop
+5. Include each host's area in the Luma description when known, without seniority (for example: Developer Experience, Customer Engineering)
+6. Never fabricate host details — always look up or ask
 
 When no date is specified:
 1. Call list-luma-events to check existing events
@@ -52,14 +57,19 @@ When a description is needed:
 ## Updating Events
 
 Ask for the event ID if not provided. Before making changes, call get-luma-event to see the current event details including the description. This lets you preserve existing information when updating.
+
+## Deleting Events
+
+Ask for the event ID if not provided. Use delete-workshop to remove the workshop from both Luma and Sanity.
 `,
   model: "openrouter/anthropic/claude-opus-4.6",
   agents: {
     descriptionWriterAgent,
   },
   tools: {
-    createLumaEvent: createLumaEventTool,
-    updateLumaEvent: updateLumaEventTool,
+    createWorkshop: createWorkshopTool,
+    updateWorkshop: updateWorkshopTool,
+    deleteWorkshop: deleteWorkshopTool,
     listLumaEvents: listLumaEventsTool,
     getLumaEvent: getLumaEventTool,
     uploadLumaImage: uploadLumaImageTool,

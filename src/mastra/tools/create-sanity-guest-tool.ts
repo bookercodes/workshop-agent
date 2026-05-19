@@ -1,6 +1,6 @@
 import { createTool } from '@mastra/core/tools';
 import { z } from 'zod';
-import { getSanityClient } from '../lib/sanity-client';
+import { getSanityClient } from '../lib/sanity/client';
 
 function toSlug(name: string): string {
   return name

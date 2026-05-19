@@ -1,32 +1,6 @@
 import { createTool } from '@mastra/core/tools';
 import { z } from 'zod';
-
-const LUMA_API_BASE = 'https://public-api.luma.com/v1';
-
-interface LumaEventDetails {
-  event: {
-    api_id: string;
-    name: string;
-    description_md: string;
-    start_at: string;
-    end_at: string;
-    url: string;
-    cover_url?: string;
-    timezone: string;
-  };
-}
-
-function getLumaHeaders(): Record<string, string> {
-  const apiKey = process.env.LUMA_API_KEY;
-  if (!apiKey) {
-    throw new Error('LUMA_API_KEY environment variable is not set');
-  }
-  return {
-    'accept': 'application/json',
-    'content-type': 'application/json',
-    'x-luma-api-key': apiKey,
-  };
-}
+import { getLumaEvent } from '../lib/luma/client';
 
 export const getLumaEventTool = createTool({
   id: 'get-luma-event',
@@ -45,28 +19,17 @@ export const getLumaEventTool = createTool({
     timezone: z.string(),
   }),
   execute: async ({ eventId }) => {
-    const response = await fetch(`${LUMA_API_BASE}/event/get?id=${eventId}`, {
-      method: 'GET',
-      headers: getLumaHeaders(),
-    });
-
-    if (!response.ok) {
-      const errorText = await response.text();
-      throw new Error(`Failed to get Luma event: ${response.statusText} - ${errorText}`);
-    }
-
-    const data = await response.json() as LumaEventDetails;
-    const event = data.event;
+    const event = await getLumaEvent(eventId);
 
     return {
       eventId: event.api_id,
       title: event.name,
-      description: event.description_md,
+      description: event.description_md || '',
       startAt: event.start_at,
       endAt: event.end_at,
       url: event.url,
       coverUrl: event.cover_url,
-      timezone: event.timezone,
+      timezone: event.timezone || 'Europe/London',
     };
   },
 });
