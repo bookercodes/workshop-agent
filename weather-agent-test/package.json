@@ -1,5 +1,5 @@
 {
-  "name": "workshop-helper-agent",
+  "name": "weather-agent-test",
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
@@ -7,32 +7,28 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "dev": "mastra dev",
     "build": "mastra build",
-    "start": "mastra start",
-    "sync:luma-to-sanity": "node scripts/sync-luma-to-sanity.mjs"
+    "start": "mastra start"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "packageManager": "pnpm@10.27.0",
   "type": "module",
   "engines": {
     "node": ">=22.13.0"
   },
   "dependencies": {
     "@mastra/core": "^1.47.0",
+    "@mastra/duckdb": "^1.5.0",
     "@mastra/evals": "^1.5.0",
     "@mastra/libsql": "^1.14.2",
     "@mastra/loggers": "^1.2.0",
     "@mastra/memory": "^1.21.2",
     "@mastra/observability": "^1.15.2",
-    "@sanity/client": "^7.17.0",
-    "axios": "^1.13.5",
-    "date-fns": "^4.1.0",
-    "zod": "^4.3.6"
+    "zod": "^4.4.3"
   },
   "devDependencies": {
-    "@types/node": "^25.2.3",
+    "@types/node": "^26.0.1",
     "mastra": "^1.16.0",
-    "typescript": "^5.9.3"
+    "typescript": "^6.0.3"
   }
 }

@@ -32,5 +32,5 @@ Formatting requirements:
 - Do not add a subject line, greeting, signature, bullets, or commentary.
 - Do not mention Sanity, Luma internals, workflows, or automation.
 `,
-  model: 'openrouter/anthropic/claude-opus-4.6',
+  model: 'openai/gpt-5.4',
 });

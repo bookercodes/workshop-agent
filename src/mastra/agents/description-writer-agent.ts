@@ -43,7 +43,7 @@ When the user gives follow-up feedback, refine the existing description — don'
 
 Pages you've already fetched are in your context — don't fetch them again. If you need more information, look at llms.txt (already in context) to find new pages to fetch.
 `,
-  model: "openrouter/anthropic/claude-opus-4.6",
+  model: "openai/gpt-5.4",
   tools: {
     fetchWebPage: fetchWebPageTool,
   },

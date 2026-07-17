@@ -16,6 +16,7 @@ function getCurrentUtcDate(): string {
 
 export const workshopHelperAgent = new Agent({
   id: "workshop-helper-agent",
+  description: "foobar",
   name: "Workshop Helper Agent",
   instructions: () => `
 You are a workshop assistant that creates and manages Luma events.
@@ -62,7 +63,7 @@ Ask for the event ID if not provided. Before making changes, call get-luma-event
 
 Ask for the event ID if not provided. Use delete-workshop to remove the workshop from both Luma and Sanity.
 `,
-  model: "openrouter/anthropic/claude-opus-4.6",
+  model: "openai/gpt-5.4",
   agents: {
     descriptionWriterAgent,
   },
@@ -83,7 +84,7 @@ Ask for the event ID if not provided. Use delete-workshop to remove the workshop
   memory: new Memory({
     options: {
       observationalMemory: {
-        model: "openrouter/google/gemini-2.5-flash",
+        model: "openai/gpt-5.4",
         scope: "thread",
         observation: {
           messageTokens: 15000,
