@@ -23,14 +23,6 @@ interface ExistingWorkshopDoc {
   };
 }
 
-export interface WorkshopYoutubeSyncCandidate {
-  _id: string;
-  title: string;
-  eventDate: string;
-  lumaUrl?: string;
-  youtubeUrl?: string;
-}
-
 type WorkshopPeopleField = 'hostReferences' | 'speakers' | 'hosts' | 'guests';
 type WorkshopGuestReference = { _key: string; _type: 'reference'; _ref: string };
 const DEFAULT_WORKSHOP_PEOPLE_FIELD: WorkshopPeopleField = 'hostReferences';
@@ -333,35 +325,4 @@ export async function deleteWorkshopFromSanity(input: {
 
   await client.delete(existingDoc._id);
   return { deleted: true, docId: existingDoc._id };
-}
-
-async function findLatestPastWorkshopDoc<T>(): Promise<T | undefined> {
-  const client = getSanityClient();
-  const docType = process.env.SANITY_WORKSHOP_DOC_TYPE || 'workshop';
-  const now = new Date().toISOString();
-
-  const doc = await client.fetch(
-    `*[_type == $docType && defined(title) && defined(eventDate) && dateTime(eventDate) <= dateTime($now)] | order(dateTime(eventDate) desc)[0]{
-      _id,
-      title,
-      eventDate,
-      lumaUrl,
-      youtubeUrl
-    }`,
-    { docType, now },
-  ) as T | null;
-
-  return doc || undefined;
-}
-
-export async function findWorkshopForYoutubeSync(): Promise<WorkshopYoutubeSyncCandidate | undefined> {
-  return findLatestPastWorkshopDoc<WorkshopYoutubeSyncCandidate>();
-}
-
-export async function updateWorkshopYoutubeUrl(input: {
-  docId: string;
-  youtubeUrl: string;
-}): Promise<void> {
-  const client = getSanityClient();
-  await client.patch(input.docId).set({ youtubeUrl: input.youtubeUrl }).commit();
 }

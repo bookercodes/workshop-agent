@@ -14,24 +14,34 @@ Open [http://localhost:4111](http://localhost:4111) in your browser to access [M
 
 You can start editing files inside the `src/mastra` directory. The development server will automatically reload whenever you make changes.
 
+## Slack channel
+
+The `agent` is available as a Slack bot through Mastra's Slack channel adapter. Set these environment variables:
+
+```shell
+SLACK_BOT_TOKEN=xoxb-your-bot-token
+SLACK_SIGNING_SECRET=your-signing-secret
+```
+
+Configure both Slack Event Subscriptions and Interactivity to use this webhook:
+
+```text
+https://<YOUR-PUBLIC-URL>/api/agents/agent/channels/slack/webhook
+```
+
+Subscribe the bot to `app_mention`, `message.channels`, and `message.im`. Grant it the `app_mentions:read`, `channels:history`, `channels:read`, `chat:write`, `im:history`, `im:read`, `im:write`, and `users:read` bot scopes.
+
+For local development, expose the Mastra server to Slack with a tunnel:
+
+```shell
+pnpm dlx cloudflared tunnel --url http://localhost:4111
+```
+
 ## Learn more
 
 To learn more about Mastra, visit our [documentation](https://mastra.ai/docs/). Your bootstrapped project includes example code for [agents](https://mastra.ai/docs/agents/overview), [tools](https://mastra.ai/docs/agents/using-tools), [workflows](https://mastra.ai/docs/workflows/overview), [scorers](https://mastra.ai/docs/evals/overview), and [observability](https://mastra.ai/docs/observability/overview).
 
 If you're new to AI agents, check out our [course](https://mastra.ai/course) and [YouTube videos](https://youtube.com/@mastra-ai). You can also join our [Discord](https://discord.gg/BTYqqHKUrf) community to get help and share your projects.
-
-## YouTube stream sync
-
-Run the `sync-workshop-youtube-stream` workflow manually with no input. It finds the most recent workshop that has already happened, matches its title against the latest YouTube streams using `yt-dlp`, and writes the matched URL to Sanity's `youtubeUrl` field.
-
-Deployment must provide `yt-dlp` on `PATH`, or set `YT_DLP_BINARY` to its location.
-
-Optional environment variables:
-
-- `YOUTUBE_STREAMS_URL` (default: `https://www.youtube.com/@mastra-ai/streams`)
-- `YOUTUBE_STREAM_LIMIT` (default: `3`)
-- `YOUTUBE_TITLE_MATCH_MIN_SCORE` (default: `0.82`)
-- `YT_DLP_BINARY` (default: `yt-dlp`)
 
 ## Deploy on Mastra Cloud
 

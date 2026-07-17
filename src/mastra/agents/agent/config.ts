@@ -1,4 +1,5 @@
 import { agentConfig } from "@mastra/core/agent";
+import { createSlackAdapter } from "@chat-adapter/slack";
 
 function getCurrentUtcDate(): string {
   return new Date().toISOString().slice(0, 10);
@@ -55,6 +56,11 @@ Ask for the event ID if not provided. Before making changes, call get-luma-event
 Ask for the event ID if not provided. Use delete-workshop to remove the workshop from both Luma and Sanity.
 `,
   model: "openai/gpt-5.6-sol",
+  channels: {
+    adapters: {
+      slack: createSlackAdapter(),
+    },
+  },
   // File-based agents otherwise receive filesystem and shell tools by default.
   workspace: () => undefined,
   defaultOptions: {
