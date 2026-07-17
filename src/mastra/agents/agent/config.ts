@@ -1,23 +1,22 @@
-import { Agent } from "@mastra/core/agent";
-import { Memory } from "@mastra/memory";
-import { createWorkshopTool } from "../tools/create-workshop-tool";
-import { updateWorkshopTool } from "../tools/update-workshop-tool";
-import { deleteWorkshopTool } from "../tools/delete-workshop-tool";
-import { listLumaEventsTool } from "../tools/list-luma-events-tool";
-import { getLumaEventTool } from "../tools/get-luma-event-tool";
-import { uploadLumaImageTool } from "../tools/upload-luma-image-tool";
-import { searchSanityGuestsTool } from "../tools/search-sanity-guests-tool";
-import { createSanityGuestTool } from "../tools/create-sanity-guest-tool";
-import { descriptionWriterAgent } from "./description-writer-agent";
+import { agentConfig } from "@mastra/core/agent";
+import { createSanityGuestTool } from "../../tools/create-sanity-guest-tool";
+import { createWorkshopTool } from "../../tools/create-workshop-tool";
+import { deleteWorkshopTool } from "../../tools/delete-workshop-tool";
+import { getLumaEventTool } from "../../tools/get-luma-event-tool";
+import { listLumaEventsTool } from "../../tools/list-luma-events-tool";
+import { searchSanityGuestsTool } from "../../tools/search-sanity-guests-tool";
+import { updateWorkshopTool } from "../../tools/update-workshop-tool";
+import { uploadLumaImageTool } from "../../tools/upload-luma-image-tool";
 
 function getCurrentUtcDate(): string {
   return new Date().toISOString().slice(0, 10);
 }
 
-export const workshopHelperAgent = new Agent({
-  id: "workshop-helper-agent",
-  description: "foobar",
-  name: "Workshop Helper Agent",
+export default agentConfig({
+  id: "agent",
+  description:
+    "Creates and manages Mastra workshop events in Luma, coordinates host details through Sanity, and delegates workshop description writing.",
+  name: "Agent",
   instructions: () => `
 You are a workshop assistant that creates and manages Luma events.
 
@@ -63,10 +62,7 @@ Ask for the event ID if not provided. Before making changes, call get-luma-event
 
 Ask for the event ID if not provided. Use delete-workshop to remove the workshop from both Luma and Sanity.
 `,
-  model: "openai/gpt-5.4",
-  agents: {
-    descriptionWriterAgent,
-  },
+  model: "openai/gpt-5.6-sol",
   tools: {
     createWorkshop: createWorkshopTool,
     updateWorkshop: updateWorkshopTool,
@@ -77,21 +73,9 @@ Ask for the event ID if not provided. Use delete-workshop to remove the workshop
     searchSanityGuests: searchSanityGuestsTool,
     createSanityGuest: createSanityGuestTool,
   },
+  // File-based agents otherwise receive filesystem and shell tools by default.
+  workspace: () => undefined,
   defaultOptions: {
     requireToolApproval: false,
   },
-  memory: new Memory({
-    options: {
-      observationalMemory: {
-        model: "openai/gpt-5.4",
-        scope: "thread",
-        observation: {
-          messageTokens: 15000,
-        },
-        reflection: {
-          observationTokens: 20000,
-        },
-      },
-    },
-  }),
 });

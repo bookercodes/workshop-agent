@@ -201,3 +201,5 @@ export const syncWorkshopYoutubeStreamWorkflow = createWorkflow({
   .then(matchWorkshopStreamStep)
   .then(updateSanityYoutubeUrlStep)
   .commit();
+
+export default syncWorkshopYoutubeStreamWorkflow;
