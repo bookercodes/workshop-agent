@@ -1,9 +1,9 @@
 import { createTool } from '@mastra/core/tools';
 import { z } from 'zod';
-import { deleteLumaEvent, getLumaEvent, isLumaNotFoundError } from '../lib/luma/client';
-import { deleteWorkshopFromSanity } from '../lib/sanity/workshops';
+import { deleteLumaEvent, getLumaEvent, isLumaNotFoundError } from '../../../lib/luma/client';
+import { deleteWorkshopFromSanity } from '../../../lib/sanity/workshops';
 
-export const deleteWorkshopTool = createTool({
+const deleteWorkshopTool = createTool({
   id: 'delete-workshop',
   description: 'Delete a workshop in Luma and remove its corresponding workshop document in Sanity',
   requireApproval: true,
@@ -54,3 +54,5 @@ export const deleteWorkshopTool = createTool({
     };
   },
 });
+
+export default deleteWorkshopTool;

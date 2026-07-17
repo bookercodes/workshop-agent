@@ -1,12 +1,4 @@
 import { agentConfig } from "@mastra/core/agent";
-import { createSanityGuestTool } from "../../tools/create-sanity-guest-tool";
-import { createWorkshopTool } from "../../tools/create-workshop-tool";
-import { deleteWorkshopTool } from "../../tools/delete-workshop-tool";
-import { getLumaEventTool } from "../../tools/get-luma-event-tool";
-import { listLumaEventsTool } from "../../tools/list-luma-events-tool";
-import { searchSanityGuestsTool } from "../../tools/search-sanity-guests-tool";
-import { updateWorkshopTool } from "../../tools/update-workshop-tool";
-import { uploadLumaImageTool } from "../../tools/upload-luma-image-tool";
 
 function getCurrentUtcDate(): string {
   return new Date().toISOString().slice(0, 10);
@@ -63,16 +55,6 @@ Ask for the event ID if not provided. Before making changes, call get-luma-event
 Ask for the event ID if not provided. Use delete-workshop to remove the workshop from both Luma and Sanity.
 `,
   model: "openai/gpt-5.6-sol",
-  tools: {
-    createWorkshop: createWorkshopTool,
-    updateWorkshop: updateWorkshopTool,
-    deleteWorkshop: deleteWorkshopTool,
-    listLumaEvents: listLumaEventsTool,
-    getLumaEvent: getLumaEventTool,
-    uploadLumaImage: uploadLumaImageTool,
-    searchSanityGuests: searchSanityGuestsTool,
-    createSanityGuest: createSanityGuestTool,
-  },
   // File-based agents otherwise receive filesystem and shell tools by default.
   workspace: () => undefined,
   defaultOptions: {

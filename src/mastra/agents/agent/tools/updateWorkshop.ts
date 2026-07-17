@@ -1,9 +1,9 @@
 import { createTool } from '@mastra/core/tools';
 import { z } from 'zod';
 import { addMinutes } from 'date-fns';
-import { getLumaEvent, updateLumaEvent, type LumaUpdateEventInput } from '../lib/luma/client';
-import { uploadLumaImageFromRemoteUrl } from '../lib/luma/images';
-import { upsertWorkshopFromLumaEvent } from '../lib/sanity/workshops';
+import { getLumaEvent, updateLumaEvent, type LumaUpdateEventInput } from '../../../lib/luma/client';
+import { uploadLumaImageFromRemoteUrl } from '../../../lib/luma/images';
+import { upsertWorkshopFromLumaEvent } from '../../../lib/sanity/workshops';
 
 const hostSchema = z.object({
   guestId: z.string().optional().describe('Sanity guest document ID (recommended when available)'),
@@ -50,7 +50,7 @@ function buildDescription(
   return parts.join('\n');
 }
 
-export const updateWorkshopTool = createTool({
+const updateWorkshopTool = createTool({
   id: 'update-workshop',
   description: 'Update a workshop in Luma, then update its corresponding workshop document in Sanity',
   requireApproval: true,
@@ -134,3 +134,5 @@ export const updateWorkshopTool = createTool({
     };
   },
 });
+
+export default updateWorkshopTool;

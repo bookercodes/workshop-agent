@@ -1,9 +1,9 @@
 import { createTool } from '@mastra/core/tools';
 import { z } from 'zod';
 import { addMinutes } from 'date-fns';
-import { createLumaEvent, getLumaEvent } from '../lib/luma/client';
-import { uploadLumaImageFromRemoteUrl } from '../lib/luma/images';
-import { upsertWorkshopFromLumaEvent } from '../lib/sanity/workshops';
+import { createLumaEvent, getLumaEvent } from '../../../lib/luma/client';
+import { uploadLumaImageFromRemoteUrl } from '../../../lib/luma/images';
+import { upsertWorkshopFromLumaEvent } from '../../../lib/sanity/workshops';
 
 const DEFAULT_COVER_IMAGE_URL = 'https://images.lumacdn.com/event-covers/g3/9cd7b6f5-3556-4a1b-8985-3cbdb27e3a33.png';
 
@@ -52,7 +52,7 @@ function buildDescription(
   return parts.join('\n');
 }
 
-export const createWorkshopTool = createTool({
+const createWorkshopTool = createTool({
   id: 'create-workshop',
   description: 'Create a workshop in Luma, then create or update its corresponding workshop document in Sanity',
   requireApproval: true,
@@ -110,3 +110,5 @@ export const createWorkshopTool = createTool({
     };
   },
 });
+
+export default createWorkshopTool;

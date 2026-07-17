@@ -1,8 +1,8 @@
 import { createTool } from '@mastra/core/tools';
 import { z } from 'zod';
-import { uploadLumaImageFromDataUrl } from '../lib/luma/images';
+import { uploadLumaImageFromDataUrl } from '../../../lib/luma/images';
 
-export const uploadLumaImageTool = createTool({
+const uploadLumaImageTool = createTool({
   id: 'upload-luma-image',
   description: 'Upload an image to Luma CDN. Returns a URL that can be used as a cover image when creating or updating events.',
   inputSchema: z.object({
@@ -17,3 +17,5 @@ export const uploadLumaImageTool = createTool({
     };
   },
 });
+
+export default uploadLumaImageTool;

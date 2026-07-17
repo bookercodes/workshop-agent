@@ -1,8 +1,8 @@
 import { createTool } from '@mastra/core/tools';
 import { z } from 'zod';
-import { getLumaEvent } from '../lib/luma/client';
+import { getLumaEvent } from '../../../lib/luma/client';
 
-export const getLumaEventTool = createTool({
+const getLumaEventTool = createTool({
   id: 'get-luma-event',
   description: 'Get full details of a Luma event including its description. Use this before updating an event to see what information is already there.',
   inputSchema: z.object({
@@ -33,3 +33,5 @@ export const getLumaEventTool = createTool({
     };
   },
 });
+
+export default getLumaEventTool;

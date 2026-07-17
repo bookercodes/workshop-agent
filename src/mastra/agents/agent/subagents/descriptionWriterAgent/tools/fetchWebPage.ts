@@ -1,7 +1,7 @@
 import { createTool } from '@mastra/core/tools';
 import { z } from 'zod';
 
-export const fetchWebPageTool = createTool({
+const fetchWebPageTool = createTool({
   id: 'fetch-web-page',
   description: 'Fetch the content of a web page. Returns the text content (HTML stripped).',
   inputSchema: z.object({
@@ -46,3 +46,5 @@ export const fetchWebPageTool = createTool({
     return { content, title };
   },
 });
+
+export default fetchWebPageTool;

@@ -1,7 +1,7 @@
 import { createTool } from '@mastra/core/tools';
 import type { QueryParams } from '@sanity/client';
 import { z } from 'zod';
-import { getSanityClient } from '../lib/sanity/client';
+import { getSanityClient } from '../../../lib/sanity/client';
 
 const guestSchema = z.object({
   _id: z.string(),
@@ -15,7 +15,7 @@ const guestSchema = z.object({
 
 type Guest = z.infer<typeof guestSchema>;
 
-export const searchSanityGuestsTool = createTool({
+const searchSanityGuestsTool = createTool({
   id: 'search-sanity-guests',
   description: 'Search for guests in Sanity CMS by name or partial name',
   inputSchema: z.object({
@@ -43,3 +43,5 @@ export const searchSanityGuestsTool = createTool({
     return { guests };
   },
 });
+
+export default searchSanityGuestsTool;

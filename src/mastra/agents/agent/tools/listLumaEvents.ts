@@ -1,8 +1,8 @@
 import { createTool } from '@mastra/core/tools';
 import { z } from 'zod';
-import { listLumaEvents } from '../lib/luma/client';
+import { listLumaEvents } from '../../../lib/luma/client';
 
-export const listLumaEventsTool = createTool({
+const listLumaEventsTool = createTool({
   id: 'list-luma-events',
   description: 'List upcoming events from Luma calendar. Use this to find scheduled events and identify available dates.',
   inputSchema: z.object({
@@ -35,3 +35,5 @@ export const listLumaEventsTool = createTool({
     };
   },
 });
+
+export default listLumaEventsTool;

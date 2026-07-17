@@ -1,6 +1,6 @@
 import { createTool } from '@mastra/core/tools';
 import { z } from 'zod';
-import { getSanityClient } from '../lib/sanity/client';
+import { getSanityClient } from '../../../lib/sanity/client';
 
 function toSlug(name: string): string {
   return name
@@ -10,7 +10,7 @@ function toSlug(name: string): string {
     .replace(/\s+/g, '-');
 }
 
-export const createSanityGuestTool = createTool({
+const createSanityGuestTool = createTool({
   id: 'create-sanity-guest',
   description: 'Create a new guest in Sanity CMS',
   requireApproval: true,
@@ -45,3 +45,5 @@ export const createSanityGuestTool = createTool({
     };
   },
 });
+
+export default createSanityGuestTool;
