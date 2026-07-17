@@ -10,9 +10,25 @@ Start the development server:
 pnpm run dev
 ```
 
-Open [http://localhost:4111](http://localhost:4111) in your browser to access [Mastra Studio](https://mastra.ai/docs/getting-started/studio). It provides an interactive UI for building and testing your agents, along with a REST API that exposes your Mastra application as a local service. This lets you start building without worrying about integration right away.
+Open [http://localhost:1333](http://localhost:1333) in your browser to access [Mastra Studio](https://mastra.ai/docs/getting-started/studio). It provides an interactive UI for building and testing your agents, along with a REST API that exposes your Mastra application as a local service. This lets you start building without worrying about integration right away.
 
 You can start editing files inside the `src/mastra` directory. The development server will automatically reload whenever you make changes.
+
+## Server authentication
+
+Set `MASTRA_SERVER_API_KEY` to a random value of at least 32 characters before starting the server. Generate one with:
+
+```shell
+openssl rand -hex 32
+```
+
+Mastra's built-in API routes require this value as a bearer token:
+
+```text
+Authorization: Bearer <MASTRA_SERVER_API_KEY>
+```
+
+The Slack webhook is intentionally exempt from Mastra bearer authentication. Slack authenticates requests to that route using its request signature and `SLACK_SIGNING_SECRET` instead.
 
 ## Slack channel
 
@@ -34,7 +50,7 @@ Subscribe the bot to `app_mention`, `message.channels`, and `message.im`. Grant 
 For local development, expose the Mastra server to Slack with a tunnel:
 
 ```shell
-pnpm dlx cloudflared tunnel --url http://localhost:4111
+pnpm dlx cloudflared tunnel --url http://localhost:1333
 ```
 
 ## Learn more
